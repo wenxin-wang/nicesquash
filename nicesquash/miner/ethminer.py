@@ -1,0 +1,2 @@
+class EthMiner:
+    pass

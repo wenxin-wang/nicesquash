@@ -1,0 +1,9 @@
+---
+ccminer:
+  lyra2re: lyra2
+  lyra2rev2: lyra2v2
+  lbry: lbry
+
+other:
+  daggerhashimoto: ethminer
+  equihash: nheqminer
