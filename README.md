@@ -1,4 +1,6 @@
-## Requirements
+## How to run
 
-- Python 3
-- python-yaml
+```
+./prep.sh
+./run.sh
+```

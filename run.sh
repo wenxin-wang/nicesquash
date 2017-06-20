@@ -24,15 +24,18 @@ fi
 LOG_DIR=$CWD/logs
 mkdir -p $LOG_DIR
 
-if [ ! -e $INSTANCE/miner_algo.yml ]; then
-    ln -s $LIB_DIR/miner_algo.yml $INSTANCE
-fi
+for yml in miner_algo config; do
+    if [ ! -e $INSTANCE/$yml.yml ]; then
+        ln -s $LIB_DIR/$yml.yml $INSTANCE
+    fi
+done
 
 tmux new-session -d -s ${SESSION_NAME}
 cmd="python $MAIN -d $CWD -t ${SESSION_NAME}"
 if [ ! -z $BENCHMARK ]; then
     cmd="$cmd -b"
 fi
+tmux send-keys -t ${SESSION_NAME}:0 ". $INSTANCE/venv/bin/activate" C-m
 tmux send-keys -t ${SESSION_NAME}:0 "$cmd" C-m
 
 #tmux send-keys -t ${SESSION_NAME}:0.$((i+1)) "tail --follow=name $l" C-m
