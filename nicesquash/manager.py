@@ -8,6 +8,8 @@ class Manager:
             Worker(gpu, conf)
             for gpu in conf.config.cuda
         ]
+        nw = len(conf.config.cuda)
+        conf.tmux.set_layout(nw)
 
     def kickOff(self):
         if self.conf.benchmark:

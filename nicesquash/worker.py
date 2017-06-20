@@ -12,12 +12,11 @@ class Worker:
         self.cwd = conf.cwd
         self.config = conf.config
         self.algos = conf.algos
+        self.tmux = conf.tmux
         self.is_benchmark = conf.benchmark
         min_wait = self.config.nicehash.min_wait
         self.nicehash = NiceHashAPI(self.gpu.address, min_wait)
         self.miner = None
-        self.clog_p = self.cwd / 'logs' / ('gpu-%s-cur.log' % self.gpu.gpu_id)
-        self.clog_p.touch()
 
     def read_heuristics(self):
         h = self.cwd / ("gpu_heuristics_%d.json" % self.gpu.gpu_id)
@@ -53,11 +52,7 @@ class Worker:
         log_p = self.cwd / 'logs' / ('gpu-%s-%s-%s.log' % (self.gpu.gpu_id,
                                                            now, algo['name']))
         log_p.touch()
-        if self.clog_p.exists():
-            self.clog_p.unlink()
-        tmp_sym = self.clog_p.with_suffix('.tmp')
-        tmp_sym.symlink_to(log_p)
-        tmp_sym.rename(self.clog_p)
+        self.tmux.gpu_log(self.gpu, log_p)
         if type(algo_conf) is tuple:
             miner_type = miner_types[algo_conf[0]]
             self.miner = miner_type(

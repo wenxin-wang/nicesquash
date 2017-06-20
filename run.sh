@@ -9,7 +9,6 @@ MAIN=$LIB_DIR/cli.py
 INSTANCE=$EXEC_DIR/instance
 
 CWD=${CWD:-$INSTANCE}
-NGPU=${NGPU:-1}
 
 quit() {
     echo $1
@@ -30,19 +29,11 @@ if [ ! -e $INSTANCE/miner_algo.yml ]; then
 fi
 
 tmux new-session -d -s ${SESSION_NAME}
-cmd="python $MAIN -d $CWD"
+cmd="python $MAIN -d $CWD -t ${SESSION_NAME}"
 if [ ! -z $BENCHMARK ]; then
     cmd="$cmd -b"
 fi
 tmux send-keys -t ${SESSION_NAME}:0 "$cmd" C-m
 
-for i in $(seq 0 $((NGPU-1))); do
-    l=$LOG_DIR/gpu-$i-cur.log
-    rm -r $l
-    touch $l
-    tmux split-window -t ${SESSION_NAME}:0
-    tmux send-keys -t ${SESSION_NAME}:0.$((i+1)) "tail --follow=name $l" C-m
-done
-
-tmux select-layout -t ${SESSION_NAME}:0 tiled
+#tmux send-keys -t ${SESSION_NAME}:0.$((i+1)) "tail --follow=name $l" C-m
 tmux attach-session -t ${SESSION_NAME}
