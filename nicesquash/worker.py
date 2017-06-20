@@ -50,11 +50,14 @@ class Worker:
 
     def exec(self, algo, algo_conf):
         now = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        log_p = self.cwd / 'logs' / ('gpu-%s-%s.log' % (now, self.gpu.gpu_id))
+        log_p = self.cwd / 'logs' / ('gpu-%s-%s-%s.log' % (self.gpu.gpu_id,
+                                                           now, algo['name']))
+        log_p.touch()
         if self.clog_p.exists():
             self.clog_p.unlink()
-        self.clog_p.symlink_to(log_p)
-        log_p.touch()
+        tmp_sym = self.clog_p.with_suffix('.tmp')
+        tmp_sym.symlink_to(log_p)
+        tmp_sym.rename(self.clog_p)
         if type(algo_conf) is tuple:
             miner_type = miner_types[algo_conf[0]]
             self.miner = miner_type(

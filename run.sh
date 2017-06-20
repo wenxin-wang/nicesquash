@@ -9,6 +9,7 @@ MAIN=$LIB_DIR/cli.py
 INSTANCE=$EXEC_DIR/instance
 
 CWD=${CWD:-$INSTANCE}
+NGPU=${NGPU:-1}
 
 quit() {
     echo $1
@@ -35,13 +36,12 @@ if [ ! -z $BENCHMARK ]; then
 fi
 tmux send-keys -t ${SESSION_NAME}:0 "$cmd" C-m
 
-sleep 0.3
-
-i=1
-for l in $LOG_DIR/*-cur.log; do
+for i in $(seq 0 $((NGPU-1))); do
+    l=$LOG_DIR/gpu-$i-cur.log
+    rm -r $l
+    touch $l
     tmux split-window -t ${SESSION_NAME}:0
-    tmux send-keys -t ${SESSION_NAME}:0.$i "tail --follow=name $l" C-m
-    i=$((i+1))
+    tmux send-keys -t ${SESSION_NAME}:0.$((i+1)) "tail --follow=name $l" C-m
 done
 
 tmux select-layout -t ${SESSION_NAME}:0 tiled

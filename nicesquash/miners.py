@@ -1,5 +1,5 @@
 import os
-from subprocess import Popen, STDOUT
+from subprocess import Popen, PIPE, CalledProcessError
 
 
 class Miner:
@@ -23,9 +23,18 @@ class Miner:
         cmd = [str(w) for w in cmd]
         if 'DRY' in os.environ:
             cmd = ['echo', '"%s"' % ' '.join(cmd)]
-        with open(self.log_p, 'w') as f:
-            self.proc = Popen(cmd, stdout=f, stderr=STDOUT)
-        return self.proc
+        cmd += ['2>&1', '|', 'tee', str(self.log_p)]
+        cmd = ' '.join(cmd)
+        proc = Popen(
+            cmd,
+            shell=True,
+            universal_newlines=True,
+            stdout=PIPE)
+        with proc:
+            for line in proc.stdout:
+                print(line.rstrip())
+        if proc.returncode:
+            raise CalledProcessError(proc.returncode, cmd)
 
 
 class CCMiner(Miner):
