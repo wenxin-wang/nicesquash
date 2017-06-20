@@ -31,7 +31,7 @@ fi
 tmux new-session -d -s ${SESSION_NAME}
 cmd="python $MAIN -d $CWD"
 if [ ! -z $BENCHMARK ]; then
-    cmd="$cmd -b $BENCHMARK"
+    cmd="$cmd -b"
 fi
 tmux send-keys -t ${SESSION_NAME}:0 "$cmd" C-m
 

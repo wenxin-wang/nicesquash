@@ -28,6 +28,12 @@ class Config:
             config['nicehash'] = nicehash
         if 'min_wait' not in nicehash:
             nicehash['min_wait'] = None
+        default = config['worker_default']
+        cudas = [
+            dict(default, **gpu)
+            for gpu in config['cuda']
+        ]
+        config['cuda'] = cudas
         self.config = dict_to_object(config)
         return self.config
 

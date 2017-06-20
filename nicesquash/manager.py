@@ -1,7 +1,7 @@
 from worker import Worker
 
 
-class Scheduler:
+class Manager:
     def __init__(self, conf):
         self.conf = conf
         self.workers = [
@@ -10,6 +10,6 @@ class Scheduler:
         ]
 
     def kickOff(self):
-        if self.conf.config.benchmark:
+        if self.conf.benchmark:
             for w in self.workers:
                 w.start()
