@@ -55,6 +55,7 @@ class Config:
 class Conf:
     pass
 
+
 def dict_to_object(d):
     o = Conf()
     for k, v in d.items():

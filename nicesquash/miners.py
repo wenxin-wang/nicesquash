@@ -1,13 +1,15 @@
 import os
-from subprocess import Popen, PIPE, CalledProcessError
+from tmux import Tmux
 
 
 class Miner:
-    def __init__(self, algo, gpu, log_p):
+    def __init__(self, algo, gpu, log_p, session, loop):
         self.algo = algo
         self.gpu = gpu
         self.log_p = log_p
         self.proc = None
+        self.loop = loop
+        self.tmux = Tmux(session, loop, gpu.gpu_id)
 
     @property
     def stratum(self):
@@ -16,7 +18,7 @@ class Miner:
         url = 'stratum+tcp://%s.hk.nicehash.com:%s' % (name, port)
         return url
 
-    def exec(self):
+    async def exec(self):
         cmd = self.cmd
         prog = cmd[0]
         self.cmd[0] = os.environ.get(prog.upper(), prog)
@@ -25,26 +27,14 @@ class Miner:
             cmd = ['echo', '"%s"' % ' '.join(cmd)]
         cmd += ['2>&1', '|', 'tee', str(self.log_p)]
         cmd = ' '.join(cmd)
-        proc = Popen(
-            cmd,
-            shell=True,
-            universal_newlines=True,
-            stdout=PIPE)
-        with proc:
-            for line in proc.stdout:
-                print(line.rstrip())
-        if proc.returncode:
-            raise CalledProcessError(proc.returncode, cmd)
+
+        await self.tmux.gpu_run(cmd)
 
 
 class CCMiner(Miner):
-    def __init__(self, ccalgo_name, algo, gpu, log_p):
-        self.algo = algo
-        # CCMiner has its own naming
+    def __init__(self, ccalgo_name, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.ccalgo_name = ccalgo_name
-        self.gpu = gpu
-        self.log_p = log_p
-        self.proc = None
 
     @property
     def cmd(self):

@@ -31,7 +31,7 @@ for yml in miner_algo config; do
 done
 
 tmux new-session -d -s ${SESSION_NAME}
-cmd="python $MAIN -d $CWD -t ${SESSION_NAME}"
+cmd="python $MAIN -d $CWD -s ${SESSION_NAME}"
 if [ ! -z $BENCHMARK ]; then
     cmd="$cmd -b"
 fi
