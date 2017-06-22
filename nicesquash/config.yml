@@ -2,8 +2,7 @@
 nicehash:
   min_wait: 1
 worker_default:
-  heuristics_time: 10
-  min_stable: 70
+  min_time: 3
   location: hk
 cuda:
   - gpu_id: 0

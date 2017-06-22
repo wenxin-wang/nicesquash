@@ -1,35 +1,33 @@
-import json
 import time
-from urllib.request import urlopen
+import asyncio as aio
+import aiohttp
 
 
 class NiceHashAPI:
     api_url = 'https://api.nicehash.com/api?'
     last_req_time = None
 
-    def __init__(self, addr, min_wait):
+    def __init__(self, addr, min_wait, loop):
         self.addr = addr
         self.prices = None
         self.stats = None
         self.min_wait = min_wait or 3
         self.workers = None
+        self.loop = loop
 
-    def get_prices(self):
-        with self.request('simplemultialgo.info') as f:
-            res = json.load(f)
+    async def get_prices(self):
+        res = await self.request('simplemultialgo.info')
         self.prices = res['result']['simplemultialgo']
         return self.prices
 
-    def get_stats(self):
-        with self.request('stats.provider', addr=self.addr) as f:
-            res = json.load(f)
+    async def get_stats(self):
+        res = await self.request('stats.provider', addr=self.addr)
         self.stats = res['result']['stats']
         return self.stats
 
-    def get_workers(self, algo):
-        with self.request(
-                'stats.provider.workers', addr=self.addr, algo=algo) as f:
-            res = json.load(f)
+    async def get_workers(self, algo):
+        res = await self.request(
+                'stats.provider.workers', addr=self.addr, algo=algo)
         self.workers = res['result']['workers']
         return self.stats
 
@@ -60,14 +58,17 @@ class NiceHashAPI:
             _id = algo['algo']
             yield _id, balance, accepted_speed, rejected_speed
 
-    def request(self, method, **params):
+    async def request(self, method, **params):
         url = self.get_url(method, **params)
         if self.last_req_time:
             elapse = time.time() - self.last_req_time
             if elapse < self.min_wait:
-                time.sleep(self.min_wait - elapse)
+                await aio.sleep(self.min_wait - elapse)
         self.last_req_time = time.time()
-        return urlopen(url)
+
+        async with aiohttp.ClientSession(loop=self.loop) as session:
+            async with session.get(url) as res:
+                return await res.json(content_type=None)
 
     @classmethod
     def get_url(cls, method, **params):

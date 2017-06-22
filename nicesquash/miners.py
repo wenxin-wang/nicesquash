@@ -18,7 +18,7 @@ class Miner:
         url = 'stratum+tcp://%s.hk.nicehash.com:%s' % (name, port)
         return url
 
-    async def exec(self):
+    async def run(self):
         cmd = self.cmd
         prog = cmd[0]
         self.cmd[0] = os.environ.get(prog.upper(), prog)
@@ -29,6 +29,9 @@ class Miner:
         cmd = ' '.join(cmd)
 
         await self.tmux.gpu_run(cmd)
+
+    async def stop(self):
+        await self.tmux.gpu_stop()
 
 
 class CCMiner(Miner):
