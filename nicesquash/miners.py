@@ -1,4 +1,5 @@
 import os
+import re
 from tmux import Tmux
 
 
@@ -35,6 +36,14 @@ class Miner:
 
 
 class CCMiner(Miner):
+    rate_re = re.compile(
+        r"""
+        ^\[(?P<y>\d{4})-(?P<m>\d{2})-(?P<d>\d{2})
+        \ (?P<H>\d{2}):(?P<M>\d{2}):(?P<S>\d{2})\]
+        .*\ accepted.*,\s+(?P<rate>\S+)\s+(?P<unit_rate>\S*)
+        (H|Sol)/s
+        """, re.X)
+
     def __init__(self, ccalgo_name, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.ccalgo_name = ccalgo_name
@@ -49,6 +58,20 @@ class CCMiner(Miner):
 
 
 class EthMiner(Miner):
+    setwork_re = re.compile(r"""
+        ^.*(?P<H>\d{2}):(?P<M>\d{2}):(?P<S>\d{2})
+        .*set\s+work""", re.X)
+    rate_re = re.compile(
+        r"""
+        ^.*(?P<H>\d{2}):(?P<M>\d{2}):(?P<S>\d{2})
+        .*:\s+(?P<rate>\S*\d+)(?P<unit_rate>\D*)H/s\s+
+        \[
+        A(?P<accepts>\d+)\+(?P<accept_stales>\d+):
+        R(?P<rejects>\d+)\+(?P<reject_stales>\d+):
+        F(?P<failures>\d+)
+        \]
+        """, re.X)
+
     @property
     def cmd(self):
         return [
