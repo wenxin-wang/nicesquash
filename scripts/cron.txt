@@ -1,0 +1,1 @@
+*/1 * * * * INFLUX_URL=xxx INFLUX_AUTH=xxx /usr/bin/python /home/x/nvidia-smi-query-influxdb.py host
